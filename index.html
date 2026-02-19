@@ -239,6 +239,25 @@
             overflow: hidden;
             background: #000;
             aspect-ratio: 16/9;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Google Drive Iframe Styling */
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: none;
+            pointer-events: none;
+        }
+
+        .video-wrapper iframe.active {
+            pointer-events: auto;
         }
 
         /* Video Protection Layer */
@@ -247,131 +266,31 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - 60px);
             z-index: 10;
             cursor: pointer;
+            background: transparent;
         }
 
-        .video-wrapper video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
+        .video-protection.playing {
+            pointer-events: none;
         }
 
-        /* Hide default controls initially */
-        .video-wrapper video::-webkit-media-controls {
-            display: none !important;
-        }
-
-        .video-wrapper video::-webkit-media-controls-enclosure {
-            display: none !important;
-        }
-
-        .video-wrapper video::-webkit-media-controls-panel {
-            display: none !important;
-        }
-
-        /* Custom Controls */
-        .custom-controls {
+        /* Watermark */
+        .watermark {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-            padding: 60px 20px 20px;
-            z-index: 20;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .video-wrapper:hover .custom-controls {
-            opacity: 1;
-        }
-
-        .progress-container {
-            width: 100%;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.2);
+            top: 20px;
+            right: 20px;
+            z-index: 25;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+            letter-spacing: 2px;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 12px;
             border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .controls-left, .controls-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .control-btn {
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--accent);
-            transform: scale(1.1);
-        }
-
-        .play-btn {
-            font-size: 1.5rem;
-        }
-
-        .time-display {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: monospace;
-        }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .volume-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            outline: none;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
         }
 
         /* Play Button Overlay */
@@ -407,6 +326,35 @@
         .play-overlay.hidden {
             opacity: 0;
             pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        /* Loading Animation */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        .loader::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader.hidden {
+            display: none;
         }
 
         /* Video Info */
@@ -442,18 +390,20 @@
             color: var(--accent);
         }
 
-        /* Watermark */
-        .watermark {
+        /* Click to Watch Message */
+        .click-message {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 25;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 16;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.3);
-            font-weight: 600;
-            letter-spacing: 2px;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .click-message.hidden {
+            display: none;
         }
 
         /* Footer */
@@ -632,27 +582,6 @@
                 margin-left: 5px;
             }
 
-            .custom-controls {
-                padding: 40px 15px 15px;
-            }
-
-            .control-btn {
-                font-size: 1rem;
-                padding: 6px;
-            }
-
-            .play-btn {
-                font-size: 1.2rem;
-            }
-
-            .volume-slider {
-                width: 60px;
-            }
-
-            .time-display {
-                font-size: 0.75rem;
-            }
-
             .video-info {
                 flex-direction: column;
                 align-items: flex-start;
@@ -674,6 +603,13 @@
             .footer-bottom {
                 flex-direction: column;
                 text-align: center;
+            }
+
+            .watermark {
+                font-size: 0.7rem;
+                top: 10px;
+                right: 10px;
+                padding: 3px 8px;
             }
         }
 
@@ -697,55 +633,10 @@
                 padding: 6px 15px;
             }
 
-            .watermark {
-                font-size: 0.7rem;
-                top: 10px;
-                right: 10px;
+            .click-message {
+                font-size: 0.8rem;
+                bottom: 70px;
             }
-
-            .controls-row {
-                gap: 10px;
-            }
-
-            .controls-left, .controls-right {
-                gap: 8px;
-            }
-        }
-
-        /* Disable text selection on video area */
-        .video-wrapper {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Loading Animation */
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-        }
-
-        .loader::after {
-            content: '';
-            display: block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loader.hidden {
-            display: none;
         }
     </style>
 </head>
@@ -802,46 +693,17 @@
                     <div class="play-overlay" id="playOverlay">
                         <i class="fas fa-play"></i>
                     </div>
+
+                    <!-- Click Message -->
+                    <p class="click-message" id="clickMessage">Click to watch video</p>
                     
-                    <!-- Video - Replace src with your video -->
-                    <video id="mainVideo" playsinline>
-                        <source src="video.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    
-                    <!-- Custom Controls -->
-                    <div class="custom-controls" id="customControls">
-                        <div class="progress-container" id="progressContainer">
-                            <div class="progress-bar" id="progressBar"></div>
-                        </div>
-                        <div class="controls-row">
-                            <div class="controls-left">
-                                <button class="control-btn play-btn" id="playPauseBtn">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <button class="control-btn" id="rewindBtn">
-                                    <i class="fas fa-backward"></i>
-                                </button>
-                                <button class="control-btn" id="forwardBtn">
-                                    <i class="fas fa-forward"></i>
-                                </button>
-                                <span class="time-display">
-                                    <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
-                                </span>
-                            </div>
-                            <div class="controls-right">
-                                <div class="volume-container">
-                                    <button class="control-btn" id="muteBtn">
-                                        <i class="fas fa-volume-up"></i>
-                                    </button>
-                                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="control-btn" id="fullscreenBtn">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- YOUR GOOGLE DRIVE VIDEO -->
+                    <iframe 
+                        id="mainVideo"
+                        src="https://drive.google.com/file/d/1mivw9x4ErurNUTr9qP_IruM2-jv5WgMZ/preview"
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen
+                    ></iframe>
                 </div>
                 
                 <div class="video-info">
@@ -910,15 +772,14 @@
     <script>
         // ==================== DOWNLOAD PROTECTION ====================
         
-        // Disable right-click on entire page
+        // Disable right-click
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             return false;
         });
 
-        // Disable keyboard shortcuts for saving/downloading
+        // Disable keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Disable Ctrl+S, Ctrl+Shift+S, Ctrl+U, Ctrl+Shift+I, F12
             if (
                 (e.ctrlKey && e.key === 's') ||
                 (e.ctrlKey && e.shiftKey && e.key === 'S') ||
@@ -933,156 +794,50 @@
             }
         });
 
-        // Disable drag events on video
-        const videoWrapper = document.getElementById('videoWrapper');
-        const mainVideo = document.getElementById('mainVideo');
-
-        videoWrapper.addEventListener('dragstart', (e) => e.preventDefault());
-        mainVideo.addEventListener('dragstart', (e) => e.preventDefault());
+        // Disable drag
+        document.addEventListener('dragstart', (e) => e.preventDefault());
 
         // Disable long press on mobile
         let longPressTimer;
-        videoWrapper.addEventListener('touchstart', (e) => {
+        document.addEventListener('touchstart', (e) => {
             longPressTimer = setTimeout(() => {
                 e.preventDefault();
             }, 500);
         });
 
-        videoWrapper.addEventListener('touchend', () => {
-            clearTimeout(longPressTimer);
-        });
+        document.addEventListener('touchend', () => clearTimeout(longPressTimer));
+        document.addEventListener('touchmove', () => clearTimeout(longPressTimer));
 
-        videoWrapper.addEventListener('touchmove', () => {
-            clearTimeout(longPressTimer);
-        });
+        // ==================== GOOGLE DRIVE VIDEO CONTROLS ====================
 
-        // ==================== VIDEO PLAYER CONTROLS ====================
-        
-        const video = document.getElementById('mainVideo');
+        const iframe = document.getElementById('mainVideo');
         const playOverlay = document.getElementById('playOverlay');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const rewindBtn = document.getElementById('rewindBtn');
-        const forwardBtn = document.getElementById('forwardBtn');
-        const muteBtn = document.getElementById('muteBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const currentTimeDisplay = document.getElementById('currentTime');
-        const durationDisplay = document.getElementById('duration');
         const videoProtection = document.getElementById('videoProtection');
+        const clickMessage = document.getElementById('clickMessage');
         const loader = document.getElementById('loader');
+        let isPlaying = false;
 
-        // Format time
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
+        // Hide loader when iframe loads
+        iframe.addEventListener('load', () => {
+            loader.classList.add('hidden');
+        });
 
-        // Play/Pause
-        function togglePlay() {
-            if (video.paused) {
-                video.play();
-                playOverlay.classList.add('hidden');
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            } else {
-                video.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-            }
-        }
-
-        playOverlay.addEventListener('click', togglePlay);
-        videoProtection.addEventListener('click', togglePlay);
-        playPauseBtn.addEventListener('click', togglePlay);
-
-        // Video events
-        video.addEventListener('play', () => {
+        // Function to activate video
+        function activateVideo() {
             playOverlay.classList.add('hidden');
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        });
-
-        video.addEventListener('pause', () => {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-        });
-
-        video.addEventListener('ended', () => {
-            playOverlay.classList.remove('hidden');
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-        });
-
-        video.addEventListener('loadedmetadata', () => {
-            durationDisplay.textContent = formatTime(video.duration);
-            loader.classList.add('hidden');
-        });
-
-        video.addEventListener('timeupdate', () => {
-            const progress = (video.currentTime / video.duration) * 100;
-            progressBar.style.width = `${progress}%`;
-            currentTimeDisplay.textContent = formatTime(video.currentTime);
-        });
-
-        video.addEventListener('waiting', () => {
-            loader.classList.remove('hidden');
-        });
-
-        video.addEventListener('canplay', () => {
-            loader.classList.add('hidden');
-        });
-
-        // Progress bar click
-        progressContainer.addEventListener('click', (e) => {
-            const rect = progressContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            video.currentTime = pos * video.duration;
-        });
-
-        // Rewind & Forward
-        rewindBtn.addEventListener('click', () => {
-            video.currentTime = Math.max(0, video.currentTime - 10);
-        });
-
-        forwardBtn.addEventListener('click', () => {
-            video.currentTime = Math.min(video.duration, video.currentTime + 10);
-        });
-
-        // Volume
-        volumeSlider.addEventListener('input', () => {
-            video.volume = volumeSlider.value;
-            updateVolumeIcon();
-        });
-
-        muteBtn.addEventListener('click', () => {
-            video.muted = !video.muted;
-            updateVolumeIcon();
-        });
-
-        function updateVolumeIcon() {
-            if (video.muted || video.volume === 0) {
-                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            } else if (video.volume < 0.5) {
-                muteBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
-            } else {
-                muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-            }
+            clickMessage.classList.add('hidden');
+            iframe.classList.add('active');
+            videoProtection.classList.add('playing');
+            isPlaying = true;
         }
 
-        // Fullscreen
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                videoWrapper.requestFullscreen().catch(err => {
-                    console.log('Fullscreen error:', err);
-                });
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                document.exitFullscreen();
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        });
+        // Play overlay click
+        playOverlay.addEventListener('click', activateVideo);
 
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        // Protection layer click
+        videoProtection.addEventListener('click', () => {
+            if (!isPlaying) {
+                activateVideo();
             }
         });
 
@@ -1113,21 +868,6 @@
                 menuToggle.classList.remove('active');
                 navbar.classList.remove('active');
             });
-        });
-
-        // ==================== ADDITIONAL PROTECTION ====================
-        
-        // Disable picture-in-picture
-        video.disablePictureInPicture = true;
-
-        // Disable controls attribute (using custom controls)
-        video.controls = false;
-
-        // Prevent video source inspection
-        Object.defineProperty(video, 'src', {
-            get: function() {
-                return '';
-            }
         });
 
         // Console warning
